@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAuthActions } from '@/hooks/auth';
-import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 const loginSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -28,7 +28,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onSwitchToRegister, 
   onLoginWithOAuth 
 }) => {
-  const { login } = useAuthActions();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   
@@ -44,9 +43,20 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const onSubmit = async (data: LoginForm) => {
     setIsSubmitting(true);
     try {
-      await login(data.email, data.password);
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password
+      });
+      
+      if (error) {
+        setError('email', { message: error.message || 'Credenciais inválidas' });
+        return;
+      }
+      
+      // Login bem sucedido - redirecionar para dashboard
+      navigate('/');
     } catch (error: any) {
-      setError('email', { message: error.message || 'Credenciais inválidas' });
+      setError('email', { message: 'Ocorreu um erro ao tentar fazer login' });
     } finally {
       setIsSubmitting(false);
     }
