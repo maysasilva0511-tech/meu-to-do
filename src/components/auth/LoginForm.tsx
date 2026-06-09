@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useAuthActions } from '@/hooks/auth';
 import { Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -53,67 +53,73 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Entrar</CardTitle>
-        <CardDescription className="text-center">
-          Digite seu e-mail e senha para acessar sua conta
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">E-mail</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="seu@email.com"
-            {...register('email')}
+    <Card className="bg-white rounded-2xl shadow-xl border-0 overflow-hidden">
+      <CardContent className="p-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                E-mail
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="seu@email.com"
+                {...register('email')}
+                disabled={isSubmitting}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              />
+              {errors.email && (
+                <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
+              )}
+            </div>
+            
+            <div>
+              <Label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Senha
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                {...register('password')}
+                disabled={isSubmitting}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              />
+              {errors.password && (
+                <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
+              )}
+            </div>
+          </div>
+          
+          <Button
+            type="submit"
             disabled={isSubmitting}
-          />
-          {errors.email && (
-            <p className="text-sm text-red-500">{errors.email.message}</p>
-          )}
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="password">Senha</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            {...register('password')}
-            disabled={isSubmitting}
-          />
-          {errors.password && (
-            <p className="text-sm text-red-500">{errors.password.message}</p>
-          )}
-        </div>
-        
-        <Button
-          onClick={handleSubmit(onSubmit)}
-          className="w-full"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Entrando...
-            </>
-          ) : (
-            'Entrar'
-          )}
-        </Button>
-        
-        <div className="text-center text-sm text-gray-600">
-          Não tem conta?{' '}
-          <button
-            type="button"
-            onClick={onSwitchToRegister}
-            className="text-blue-600 hover:text-blue-800 font-medium"
-            disabled={isSubmitting}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
           >
-            Cadastre-se
-          </button>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Entrando...
+              </>
+            ) : (
+              'Entrar'
+            )}
+          </Button>
+        </form>
+        
+        <div className="text-center mt-6">
+          <p className="text-sm text-gray-600">
+            Não tem conta?{' '}
+            <button
+              type="button"
+              onClick={onSwitchToRegister}
+              className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+              disabled={isSubmitting}
+            >
+              Cadastre-se
+            </button>
+          </p>
         </div>
       </CardContent>
     </Card>
