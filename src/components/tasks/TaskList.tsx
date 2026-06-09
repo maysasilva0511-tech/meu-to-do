@@ -6,46 +6,69 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { TaskItem } from './TaskItem';
-import { Task } from '@/types/app';
+import { useTasks } from '@/hooks/tasks';
+import { useAuth } from '@/hooks/auth';
+import { supabase } from '@/lib/supabaseClient';
 
 interface TaskListProps {
-  tasks: Task[];
-  onTaskUpdate: (id: string, updates: Partial<Task>) => void;
-  onTaskDelete: (id: string) => void;
+  onCreateTask: (title: string) => void;
 }
 
-export const TaskList: React.FC<TaskListProps> = ({ 
-  tasks, 
-  onTaskUpdate, 
-  onTaskDelete 
-}) => {
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [filterStatus, setFilterStatus] = React.useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
+export const TaskList: React.FC<TaskListProps> = ({ onCreateTask }) => {
+  const { tasks, error, isLoading } = useTasks();
+  const { user } = useAuth();
   
-  const filteredTasks = tasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         task.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || task.status === filterStatus;
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [filterStatus, setFilterStatus] = React.useState<'all' | 'completed' | 'pending'>('all');
+  
+  const filteredTasks = tasks?.filter(task => {
+    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || 
+      (filterStatus === 'completed' && task.is_completed) ||
+      (filterStatus === 'pending' && !task.is_completed);
     return matchesSearch && matchesStatus;
-  });
+  }) || [];
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800 border border-green-200';
-      case 'in_progress': return 'bg-blue-100 text-blue-800 border border-blue-200';
-      case 'pending': return 'bg-orange-100 text-orange-800 border border-orange-200';
-      default: return 'bg-gray-100 text-gray-800 border border-gray-200';
-    }
+  const getStatusColor = (isCompleted: boolean) => {
+    return isCompleted ? 
+      'bg-green-100 text-green-800 border border-green-200' : 
+      'bg-orange-100 text-orange-800 border border-orange-200';
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'completed': return 'Concluída';
-      case 'in_progress': return 'Em Progresso';
-      case 'pending': return 'Pendente';
-      default: return status;
-    }
+  const getStatusText = (isCompleted: boolean) => {
+    return isCompleted ? 'Concluída' : 'Pendente';
   };
+
+  if (isLoading) {
+    return (
+      <Card className="shadow-sm border border-gray-200">
+        <CardContent className="p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+            <p className="text-gray-600">Carregando tarefas...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="shadow-sm border border-gray-200">
+        <CardContent className="p-8">
+          <div className="text-center text-red-600">
+            <p>Erro ao carregar tarefas: {error.message}</p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="mt-4"
+            >
+              Tentar novamente
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="shadow-sm border border-gray-200">
@@ -68,7 +91,6 @@ export const TaskList: React.FC<TaskListProps> = ({
             >
               <option value="all">Todas</option>
               <option value="pending">Pendentes</option>
-              <option value="in_progress">Em Progresso</option>
               <option value="completed">Concluídas</option>
             </select>
           </div>
@@ -86,8 +108,20 @@ export const TaskList: React.FC<TaskListProps> = ({
               <TaskItem
                 key={task.id}
                 task={task}
-                onStatusChange={(status) => onTaskUpdate(task.id, { status })}
-                onDelete={onTaskDelete}
+                onStatusChange={(isCompleted) => {
+                  // Atualizar status da tarefa
+                  supabase
+                    .from('todos')
+                    .update({ is_completed: isCompleted })
+                    .eq('id', task.id);
+                }}
+                onDelete={(id) => {
+                  // Deletar tarefa
+                  supabase
+                    .from('todos')
+                    .delete()
+                    .eq('id', id);
+                }}
                 getStatusColor={getStatusColor}
                 getStatusText={getStatusText}
               />

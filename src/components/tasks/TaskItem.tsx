@@ -4,15 +4,19 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Trash2, CheckCircle, Circle } from 'lucide-react';
-import { Task } from '@/types/app';
+import { CheckCircle, Circle, Trash2 } from 'lucide-react';
 
 interface TaskItemProps {
-  task: Task;
-  onStatusChange: (status: 'pending' | 'in_progress' | 'completed') => void;
+  task: {
+    id: string;
+    title: string;
+    is_completed: boolean;
+    created_at: string;
+  };
+  onStatusChange: (isCompleted: boolean) => void;
   onDelete: (id: string) => void;
-  getStatusColor: (status: string) => string;
-  getStatusText: (status: string) => string;
+  getStatusColor: (isCompleted: boolean) => string;
+  getStatusText: (isCompleted: boolean) => string;
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({ 
@@ -22,25 +26,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   getStatusColor,
   getStatusText 
 }) => {
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPriorityText = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'Alta';
-      case 'medium': return 'Média';
-      case 'low': return 'Baixa';
-      default: return priority;
-    }
-  };
-
-  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed';
+  const isOverdue = false; // A tabela `todos` não tem data de vencimento
 
   return (
     <Card className={`hover:shadow-md transition-shadow ${isOverdue ? 'border-red-200' : ''}`}>
@@ -51,41 +37,26 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               <h3 className={`font-medium ${isOverdue ? 'text-red-600' : 'text-gray-900'}`}>
                 {task.title}
               </h3>
-              <Badge className={getStatusColor(task.status)}>
-                {getStatusText(task.status)}
-              </Badge>
-              <Badge className={getPriorityColor(task.priority)}>
-                {getPriorityText(task.priority)}
+              <Badge className={getStatusColor(task.is_completed)}>
+                {getStatusText(task.is_completed)}
               </Badge>
             </div>
             
-            {task.description && (
-              <p className="text-gray-600 text-sm mb-2">{task.description}</p>
-            )}
-            
             <div className="flex items-center space-x-4 text-sm text-gray-500">
-              {task.dueDate && (
+              {task.created_at && (
                 <div className="flex items-center space-x-1">
-                  <Calendar className="h-4 w-4" />
-                  <span className={isOverdue ? 'text-red-600' : ''}>
-                    {new Date(task.dueDate).toLocaleDateString('pt-BR')}
-                  </span>
+                  <span>Criado em: {new Date(task.created_at).toLocaleDateString('pt-BR')}</span>
                 </div>
               )}
-              
-              <div className="flex items-center space-x-1">
-                <Clock className="h-4 w-4" />
-                <span>{new Date(task.createdAt).toLocaleDateString('pt-BR')}</span>
-              </div>
             </div>
           </div>
           
           <div className="flex items-center space-x-2 ml-4">
-            {task.status === 'completed' ? (
+            {task.is_completed ? (
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => onStatusChange('pending')}
+                onClick={() => onStatusChange(false)}
               >
                 <Circle className="h-4 w-4 mr-1" />
                 Reabrir
@@ -94,20 +65,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => onStatusChange('completed')}
+                onClick={() => onStatusChange(true)}
               >
                 <CheckCircle className="h-4 w-4 mr-1" />
                 Concluir
-              </Button>
-            )}
-            
-            {task.status !== 'completed' && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onStatusChange('in_progress')}
-              >
-                Iniciar
               </Button>
             )}
             

@@ -1,96 +1,93 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { taskService } from '../services/api'
 import { toast } from 'sonner'
+import { useAuth } from './auth'
 
 export const useTasks = () => {
+  const { user } = useAuth()
   const queryClient = useQueryClient()
   
   const { data: tasks, error, isLoading } = useQuery({
-    queryKey: ['tasks'],
+    queryKey: ['tasks', user?.id],
     queryFn: async () => {
-      // Adicionando dados simulados para desenvolvimento
-      const mockTasks = [
-        {
-          id: '1',
-          title: 'Concluir projeto de design',
-          description: 'Finalizar o layout da dashboard principal',
-          status: 'in_progress',
-          priority: 'high',
-          due_date: '2024-12-25',
-          user_id: 'mock-user-id',
-          created_at: '2024-12-01T10:00:00Z',
-          updated_at: '2024-12-01T10:00:00Z'
-        },
-        {
-          id: '2',
-          title: 'Revisar documentação',
-          description: 'Atualizar a documentação da API',
-          status: 'pending',
-          priority: 'medium',
-          due_date: '2024-12-20',
-          user_id: 'mock-user-id',
-          created_at: '2024-12-01T08:00:00Z',
-          updated_at: '2024-12-01T08:00:00Z'
-        },
-        {
-          id: '3',
-          title: 'Implementar testes unitários',
-          description: 'Criar testes para os componentes principais',
-          status: 'completed',
-          priority: 'low',
-          due_date: '2024-12-15',
-          user_id: 'mock-user-id',
-          created_at: '2024-11-30T14:00:00Z',
-          updated_at: '2024-12-01T16:00:00Z'
-        },
-        {
-          id: '4',
-          title: 'Configurar CI/CD',
-          description: 'Configurar pipeline de integração contínua',
-          status: 'pending',
-          priority: 'high',
-          due_date: '2024-12-30',
-          user_id: 'mock-user-id',
-          created_at: '2024-12-02T09:00:00Z',
-          updated_at: '2024-12-02T09:00:00Z'
-        }
-      ]
+      if (!user) return []
       
-      return mockTasks
+      const { data, error } = await supabase
+        .from('todos')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      return data || []
     },
+    enabled: !!user, // Só buscar se usuário estiver logado
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
   
   const createTask = useMutation({
-    mutationFn: taskService.createTask,
+    mutationFn: async (title: string) => {
+      if (!user) throw new Error('Usuário não autenticado')
+      
+      const { data, error } = await supabase
+        .from('todos')
+        .insert([{ 
+          title, 
+          user_id: user.id, 
+          is_completed: false,
+          created_at: new Date().toISOString()
+        }])
+        .select()
+      
+      if (error) throw error
+      return data[0]
+    },
     onSuccess: () => {
       toast.success('Tarefa criada com sucesso!')
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] })
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error('Erro ao criar tarefa: ' + error.message)
     }
   })
   
-  const updateTask = useMutation({
-    mutationFn: ({ id, ...task }: { id: string; [key: string]: any }) => 
-      taskService.updateTask(id, task),
+  const updateTaskStatus = useMutation({
+    mutationFn: async ({ id, isCompleted }: { id: string; isCompleted: boolean }) => {
+      const { data, error } = await supabase
+        .from('todos')
+        .update({ 
+          is_completed: isCompleted,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+      
+      if (error) throw error
+      return data[0]
+    },
     onSuccess: () => {
       toast.success('Tarefa atualizada com sucesso!')
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] })
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error('Erro ao atualizar tarefa: ' + error.message)
     }
   })
   
   const deleteTask = useMutation({
-    mutationFn: taskService.deleteTask,
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('todos')
+        .delete()
+        .eq('id', id)
+      
+      if (error) throw error
+    },
     onSuccess: () => {
       toast.success('Tarefa deletada com sucesso!')
-      queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] })
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error('Erro ao deletar tarefa: ' + error.message)
     }
   })
@@ -100,7 +97,7 @@ export const useTasks = () => {
     error, 
     isLoading, 
     createTask, 
-    updateTask, 
+    updateTaskStatus, 
     deleteTask 
   }
 }
