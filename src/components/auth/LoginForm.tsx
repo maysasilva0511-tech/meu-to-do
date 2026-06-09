@@ -43,7 +43,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const onSubmit = async (data: LoginForm) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error, data: authData } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password
       });
@@ -54,7 +54,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       }
       
       // Login bem sucedido - redirecionar para dashboard
+      console.log('Login bem sucedido, redirecionando para /');
       navigate('/');
+      
     } catch (error: any) {
       setError('email', { message: 'Ocorreu um erro ao tentar fazer login' });
     } finally {
