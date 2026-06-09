@@ -57,7 +57,7 @@ export const Login: React.FC = () => {
     }
   };
 
-  const handleSocialLogin = (provider: 'google' | 'github' => {
+  const handleSocialLogin = (provider: 'google' | 'github') => {
     // Login social - mostrar alerta temporário
     toast.info(`Login com ${provider === 'google' ? 'Google' : 'GitHub'} em desenvolvimento. Por favor, use o login por e-mail.`);
   };
