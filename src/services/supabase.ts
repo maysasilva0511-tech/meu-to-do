@@ -9,7 +9,7 @@ let authState = {
 };
 
 // Simula o estado de autenticação
-export const mockAuth = {
+const mockAuth = {
   // Função para simular login bem sucedido
   login: (email: string, password: string) => {
     return new Promise((resolve) => {
