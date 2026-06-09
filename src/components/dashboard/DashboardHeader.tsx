@@ -5,16 +5,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Bell, Search, Plus, User, LogOut, Settings } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 interface DashboardHeaderProps {
   onCreateTask: () => void;
-  onLogout: () => void;
+  onLogout?: () => void;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ 
   onCreateTask, 
   onLogout 
 }) => {
+  const navigate = useNavigate();
+  
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      // Limpa qualquer estado local e redireciona
+      navigate('/auth/login');
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    }
+  };
+
   return (
     <div className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,7 +63,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={onLogout}
+                onClick={handleLogout}
                 className="text-gray-600 hover:text-red-600 hover:bg-red-50"
               >
                 <LogOut className="h-5 w-5" />

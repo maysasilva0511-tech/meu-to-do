@@ -9,13 +9,14 @@ import { TaskModal } from '@/components/tasks/TaskModal';
 import { useTasks } from '@/hooks/tasks';
 import { useCategories } from '@/hooks/categories';
 import { Task } from '@/types/app';
-import { Button } from '@/components/ui/button';
-import { Eye } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 export const Dashboard: React.FC = () => {
   const { tasks, createTask, updateTask, deleteTask } = useTasks();
   const { categories } = useCategories();
   const [showTaskModal, setShowTaskModal] = useState(false);
+  const navigate = useNavigate();
   
   // Converter tarefas para o formato correto
   const formattedTasks = tasks?.map(task => ({
@@ -65,23 +66,12 @@ export const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <DashboardHeader 
         onCreateTask={() => setShowTaskModal(true)}
-        onLogout={() => { console.log('Logout será implementado'); }}
+        onLogout={() => {
+          supabase.auth.signOut().then(() => {
+            navigate('/auth/login');
+          });
+        }}
       />
-      
-      {/* Botão de teste de login */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex justify-end">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.location.href = '/auth/login'}
-            className="flex items-center space-x-2 border-gray-300 text-gray-600 hover:bg-gray-50"
-          >
-            <Eye className="h-4 w-4" />
-            <span>Testar Tela de Login</span>
-          </Button>
-        </div>
-      </div>
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Seção de Estatísticas */}
