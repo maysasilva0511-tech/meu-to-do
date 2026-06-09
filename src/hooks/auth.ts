@@ -2,8 +2,18 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '../services/supabase'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+
+// Estado de autenticação global
+let globalAuthState = {
+  isAuthenticated: false,
+  currentUser: null as any
+};
 
 export const useAuth = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(globalAuthState.isAuthenticated);
+  const [currentUser, setCurrentUser] = useState(globalAuthState.currentUser);
+  
   const { data, error, isLoading } = useQuery({
     queryKey: ['auth'],
     queryFn: async () => {
@@ -12,9 +22,21 @@ export const useAuth = () => {
       return user
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
-  })
+  });
   
-  return { user: data, error, isLoading }
+  useEffect(() => {
+    // Atualiza o estado local quando o global mudar
+    if (data) {
+      globalAuthState = {
+        isAuthenticated: true,
+        currentUser: data
+      };
+      setIsAuthenticated(true);
+      setCurrentUser(data);
+    }
+  }, [data]);
+  
+  return { user: currentUser, isAuthenticated, error, isLoading }
 }
 
 export const useAuthActions = () => {
@@ -27,10 +49,14 @@ export const useAuthActions = () => {
       throw error
     }
     toast.success('Login realizado com sucesso!')
-    // Redireciona para a dashboard após login
-    setTimeout(() => {
-      navigate('/')
-    }, 1000)
+    // Atualiza estado global imediatamente
+    const { data: { user } } = await supabase.auth.getUser()
+    globalAuthState = {
+      isAuthenticated: true,
+      currentUser: user
+    }
+    // Redireciona para a dashboard
+    navigate('/')
   }
   
   const signup = async (email: string, password: string) => {
@@ -40,9 +66,8 @@ export const useAuthActions = () => {
       throw error
     }
     toast.success('Cadastro realizado! Verifique seu e-mail.')
-    setTimeout(() => {
-      navigate('/')
-    }, 1000)
+    // Redireciona para a dashboard
+    navigate('/')
   }
   
   const logout = async () => {
@@ -52,9 +77,13 @@ export const useAuthActions = () => {
       throw error
     }
     toast.success('Logout realizado com sucesso!')
-    setTimeout(() => {
-      navigate('/auth/login')
-    }, 1000)
+    // Limpa estado global
+    globalAuthState = {
+      isAuthenticated: false,
+      currentUser: null
+    }
+    // Redireciona para a tela de login
+    navigate('/auth/login')
   }
   
   const loginWithOAuth = async (provider: 'google' | 'github') => {

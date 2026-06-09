@@ -13,7 +13,7 @@ import { AuthDebug } from "./components/auth/AuthDebug";
 const queryClient = new QueryClient();
 
 const AppRoutes = () => {
-  const { user, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -28,11 +28,11 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/auth/login" element={<Login />} />
-      <Route path="/auth/register" element={<Register />} />
+      <Route path="/auth/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} />
+      <Route path="/auth/register" element={!isAuthenticated ? <Register /> : <Navigate to="/" replace />} />
       <Route 
         path="/" 
-        element={user ? <Dashboard /> : <Navigate to="/auth/login" replace />} 
+        element={isAuthenticated ? <Dashboard /> : <Navigate to="/auth/login" replace />} 
       />
       <Route path="*" element={<NotFound />} />
     </Routes>

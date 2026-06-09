@@ -1,11 +1,18 @@
 // Serviço Supabase Mockado - Para desenvolvimento sem SDK real
 // Isso permite testar a UI e fluxo de autenticação sem configuração do Supabase
 
-// Estado de autenticação local (simula o estado do Supabase)
+// Estado de autenticação global (simula o estado do Supabase)
 let authState = {
   isAuthenticated: false,
   currentUser: null as any,
   session: null as any
+};
+
+// Função para atualizar o estado de autenticação global
+const updateAuthState = (newState: typeof authState) => {
+  authState = newState;
+  // Dispara evento para atualizar componentes que escutam mudanças
+  window.dispatchEvent(new CustomEvent('authStateChange', { detail: authState }));
 };
 
 // Simula o estado de autenticação
@@ -14,7 +21,7 @@ const mockAuth = {
   login: (email: string, password: string) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        authState = {
+        const newState = {
           isAuthenticated: true,
           currentUser: {
             id: 'mock-user-id',
@@ -27,18 +34,20 @@ const mockAuth = {
             expires_in: 3600
           }
         };
-        resolve({ data: { user: authState.currentUser }, error: null });
+        updateAuthState(newState);
+        resolve({ data: { user: newState.currentUser }, error: null });
       }, 1000); // Simula delay de rede
     });
   },
 
   // Função para simular logout
   logout: () => {
-    authState = {
+    const newState = {
       isAuthenticated: false,
       currentUser: null,
       session: null
     };
+    updateAuthState(newState);
     return Promise.resolve({ error: null });
   },
 
@@ -46,7 +55,7 @@ const mockAuth = {
   signup: (email: string, password: string) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        authState = {
+        const newState = {
           isAuthenticated: true,
           currentUser: {
             id: 'mock-user-id',
@@ -59,7 +68,8 @@ const mockAuth = {
             expires_in: 3600
           }
         };
-        resolve({ data: { user: authState.currentUser }, error: null });
+        updateAuthState(newState);
+        resolve({ data: { user: newState.currentUser }, error: null });
       }, 1000); // Simula delay de rede
     });
   },
@@ -78,8 +88,14 @@ const mockAuth = {
 
   // Função para simular mudança de estado de autenticação
   onAuthStateChange: (callback: (event: string, session: any) => void) => {
-    // Simula escuta de mudanças de autenticação
-    return { data: { subscription: { unsubscribe: () => {} } } };
+    // Adiciona listener para mudanças de estado
+    const handleAuthStateChange = (event: CustomEvent) => {
+      callback('SIGNED_IN', event.detail.session);
+    };
+    
+    window.addEventListener('authStateChange', handleAuthStateChange);
+    
+    return { data: { subscription: { unsubscribe: () => window.removeEventListener('authStateChange', handleAuthStateChange) } } };
   },
 
   // Função para obter estado atual (para fins de desenvolvimento)
@@ -99,4 +115,4 @@ export const supabase = {
 };
 
 // Exporta as funções mockadas para uso direto quando necessário
-export { mockAuth };
+export { mockAuth, updateAuthState };
