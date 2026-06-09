@@ -8,9 +8,55 @@ export const useTasks = () => {
   const { data: tasks, error, isLoading } = useQuery({
     queryKey: ['tasks'],
     queryFn: async () => {
-      const { data, error } = await taskService.getTasks()
-      if (error) throw error
-      return data || []
+      // Adicionando dados simulados para desenvolvimento
+      const mockTasks = [
+        {
+          id: '1',
+          title: 'Concluir projeto de design',
+          description: 'Finalizar o layout da dashboard principal',
+          status: 'in_progress',
+          priority: 'high',
+          due_date: '2024-12-25',
+          user_id: 'mock-user-id',
+          created_at: '2024-12-01T10:00:00Z',
+          updated_at: '2024-12-01T10:00:00Z'
+        },
+        {
+          id: '2',
+          title: 'Revisar documentação',
+          description: 'Atualizar a documentação da API',
+          status: 'pending',
+          priority: 'medium',
+          due_date: '2024-12-20',
+          user_id: 'mock-user-id',
+          created_at: '2024-12-01T08:00:00Z',
+          updated_at: '2024-12-01T08:00:00Z'
+        },
+        {
+          id: '3',
+          title: 'Implementar testes unitários',
+          description: 'Criar testes para os componentes principais',
+          status: 'completed',
+          priority: 'low',
+          due_date: '2024-12-15',
+          user_id: 'mock-user-id',
+          created_at: '2024-11-30T14:00:00Z',
+          updated_at: '2024-12-01T16:00:00Z'
+        },
+        {
+          id: '4',
+          title: 'Configurar CI/CD',
+          description: 'Configurar pipeline de integração contínua',
+          status: 'pending',
+          priority: 'high',
+          due_date: '2024-12-30',
+          user_id: 'mock-user-id',
+          created_at: '2024-12-02T09:00:00Z',
+          updated_at: '2024-12-02T09:00:00Z'
+        }
+      ]
+      
+      return mockTasks
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   })

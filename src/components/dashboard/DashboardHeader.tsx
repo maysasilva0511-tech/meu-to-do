@@ -4,19 +4,23 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Search, Plus, User } from 'lucide-react';
+import { Bell, Search, Plus, User, LogOut, Settings } from 'lucide-react';
 
 interface DashboardHeaderProps {
   onCreateTask: () => void;
+  onLogout: () => void;
 }
 
-export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onCreateTask }) => {
+export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ 
+  onCreateTask, 
+  onLogout 
+}) => {
   return (
     <div className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Minhas Tarefas</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Meu To Do</h1>
             <Badge variant="secondary" className="ml-3">Beta</Badge>
           </div>
           
@@ -38,9 +42,19 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onCreateTask }
               <Bell className="h-5 w-5" />
             </Button>
             
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onLogout}
+                className="text-gray-600 hover:text-red-600 hover:bg-red-50"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
