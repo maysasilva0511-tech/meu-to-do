@@ -7,7 +7,7 @@ import { useAuth } from "./hooks/auth";
 import { Login } from "./pages/auth/Login";
 import { Register } from "./pages/auth/Register";
 import { Dashboard } from "./pages/Dashboard";
-import { NotFound } from "./pages/NotFound";
+import NotFound from "./pages/NotFound";
 import { AuthDebug } from "./components/auth/AuthDebug";
 
 const queryClient = new QueryClient();
