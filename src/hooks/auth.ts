@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { supabase } from '../services/supabase'
+import { supabase } from '../lib/supabaseClient'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
@@ -33,6 +33,13 @@ export const useAuth = () => {
       };
       setIsAuthenticated(true);
       setCurrentUser(data);
+    } else {
+      globalAuthState = {
+        isAuthenticated: false,
+        currentUser: null
+      };
+      setIsAuthenticated(false);
+      setCurrentUser(null);
     }
   }, [data]);
   
