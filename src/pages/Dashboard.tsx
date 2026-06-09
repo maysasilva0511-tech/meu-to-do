@@ -9,6 +9,8 @@ import { TaskForm } from '@/components/tasks/TaskForm';
 import { useTasks } from '@/hooks/tasks';
 import { useCategories } from '@/hooks/categories';
 import { Task } from '@/types/app';
+import { Button } from '@/components/ui/button';
+import { Eye } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
   const { tasks, createTask, updateTask, deleteTask } = useTasks();
@@ -66,6 +68,21 @@ export const Dashboard: React.FC = () => {
         onCreateTask={() => setShowTaskForm(true)}
         onLogout={() => { console.log('Logout será implementado'); }}
       />
+      
+      {/* Botão de teste de login */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.location.href = '/auth/login'}
+            className="flex items-center space-x-2 border-gray-300 text-gray-600 hover:bg-gray-50"
+          >
+            <Eye className="h-4 w-4" />
+            <span>Testar Tela de Login</span>
+          </Button>
+        </div>
+      </div>
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {showTaskForm ? (
