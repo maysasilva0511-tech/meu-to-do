@@ -1,10 +1,9 @@
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '../services/supabase'
 import { toast } from 'sonner'
-import { useRouter } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 export const useAuth = () => {
-  const router = useRouter()
   const { data, error, isLoading } = useQuery({
     queryKey: ['auth'],
     queryFn: async () => {
@@ -19,7 +18,7 @@ export const useAuth = () => {
 }
 
 export const useAuthActions = () => {
-  const router = useRouter()
+  const navigate = useNavigate()
   
   const login = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -30,7 +29,7 @@ export const useAuthActions = () => {
     toast.success('Login realizado com sucesso!')
     // Redireciona para a dashboard após login
     setTimeout(() => {
-      router.push('/')
+      navigate('/')
     }, 1000)
   }
   
@@ -42,7 +41,7 @@ export const useAuthActions = () => {
     }
     toast.success('Cadastro realizado! Verifique seu e-mail.')
     setTimeout(() => {
-      router.push('/')
+      navigate('/')
     }, 1000)
   }
   
@@ -54,7 +53,7 @@ export const useAuthActions = () => {
     }
     toast.success('Logout realizado com sucesso!')
     setTimeout(() => {
-      router.push('/auth/login')
+      navigate('/auth/login')
     }, 1000)
   }
   
