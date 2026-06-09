@@ -1,8 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '../services/supabase'
 import { toast } from 'sonner'
+import { useRouter } from 'react-router-dom'
 
 export const useAuth = () => {
+  const router = useRouter()
   const { data, error, isLoading } = useQuery({
     queryKey: ['auth'],
     queryFn: async () => {
@@ -17,6 +19,8 @@ export const useAuth = () => {
 }
 
 export const useAuthActions = () => {
+  const router = useRouter()
+  
   const login = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
@@ -24,6 +28,10 @@ export const useAuthActions = () => {
       throw error
     }
     toast.success('Login realizado com sucesso!')
+    // Redireciona para a dashboard após login
+    setTimeout(() => {
+      router.push('/')
+    }, 1000)
   }
   
   const signup = async (email: string, password: string) => {
@@ -33,6 +41,9 @@ export const useAuthActions = () => {
       throw error
     }
     toast.success('Cadastro realizado! Verifique seu e-mail.')
+    setTimeout(() => {
+      router.push('/')
+    }, 1000)
   }
   
   const logout = async () => {
@@ -42,6 +53,9 @@ export const useAuthActions = () => {
       throw error
     }
     toast.success('Logout realizado com sucesso!')
+    setTimeout(() => {
+      router.push('/auth/login')
+    }, 1000)
   }
   
   const loginWithOAuth = async (provider: 'google' | 'github') => {

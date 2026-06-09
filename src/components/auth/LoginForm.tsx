@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthActions } from '@/hooks/auth';
 import { Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const loginSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -28,7 +29,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onLoginWithOAuth 
 }) => {
   const { login } = useAuthActions();
-  const [isLoading, setIsLoading] = React.useState(false);
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   
   const {
