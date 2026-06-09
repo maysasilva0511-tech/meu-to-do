@@ -5,7 +5,7 @@ import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { StatsCards } from '@/components/dashboard/StatsCards';
 import { TaskChart } from '@/components/dashboard/TaskChart';
 import { TaskList } from '@/components/tasks/TaskList';
-import { TaskForm } from '@/components/tasks/TaskForm';
+import { TaskModal } from '@/components/tasks/TaskModal';
 import { useTasks } from '@/hooks/tasks';
 import { useCategories } from '@/hooks/categories';
 import { Task } from '@/types/app';
@@ -15,7 +15,7 @@ import { Eye } from 'lucide-react';
 export const Dashboard: React.FC = () => {
   const { tasks, createTask, updateTask, deleteTask } = useTasks();
   const { categories } = useCategories();
-  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [showTaskModal, setShowTaskModal] = useState(false);
   
   // Converter tarefas para o formato correto
   const formattedTasks = tasks?.map(task => ({
@@ -51,7 +51,6 @@ export const Dashboard: React.FC = () => {
       category_id: taskData.categoryId,
       user_id: 'mock-user-id', // Obter do usuário autenticado
     });
-    setShowTaskForm(false);
   };
 
   const handleTaskUpdate = (id: string, updates: Partial<Task>) => {
@@ -65,7 +64,7 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <DashboardHeader 
-        onCreateTask={() => setShowTaskForm(true)}
+        onCreateTask={() => setShowTaskModal(true)}
         onLogout={() => { console.log('Logout será implementado'); }}
       />
       
@@ -85,44 +84,42 @@ export const Dashboard: React.FC = () => {
       </div>
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {showTaskForm ? (
-          <TaskForm
-            onSubmit={handleCreateTask}
-            onCancel={() => setShowTaskForm(false)}
-            categories={categories || []}
-          />
-        ) : (
-          <>
-            {/* Seção de Estatísticas */}
-            <StatsCards stats={stats} />
-            
-            {/* Seção de Gráfico e Lista de Tarefas */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              <TaskChart data={chartData} />
-              <div className="lg:col-span-2">
-                <TaskList
-                  tasks={formattedTasks}
-                  onTaskUpdate={handleTaskUpdate}
-                  onTaskDelete={handleTaskDelete}
-                />
-              </div>
-            </div>
-            
-            {/* Botão flutuante para criar tarefa */}
-            <div className="fixed bottom-6 right-6 z-50">
-              <button
-                onClick={() => setShowTaskForm(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <span className="font-medium">Nova Tarefa</span>
-              </button>
-            </div>
-          </>
-        )}
+        {/* Seção de Estatísticas */}
+        <StatsCards stats={stats} />
+        
+        {/* Seção de Gráfico e Lista de Tarefas */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <TaskChart data={chartData} />
+          <div className="lg:col-span-2">
+            <TaskList
+              tasks={formattedTasks}
+              onTaskUpdate={handleTaskUpdate}
+              onTaskDelete={handleTaskDelete}
+            />
+          </div>
+        </div>
+        
+        {/* Botão flutuante para criar tarefa */}
+        <div className="fixed bottom-6 right-6 z-40">
+          <button
+            onClick={() => setShowTaskModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span className="font-medium">Nova Tarefa</span>
+          </button>
+        </div>
       </main>
+
+      {/* Modal de criação de tarefas */}
+      <TaskModal
+        isOpen={showTaskModal}
+        onClose={() => setShowTaskModal(false)}
+        onSubmit={handleCreateTask}
+        categories={categories || []}
+      />
     </div>
   );
 };
