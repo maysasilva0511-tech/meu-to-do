@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthActions } from '@/hooks/auth';
+import { Loader2 } from 'lucide-react';
 
 const registerSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -31,7 +32,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   onLoginWithOAuth 
 }) => {
   const { signup } = useAuthActions();
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   
   const {
     register,
@@ -43,13 +44,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   });
 
   const onSubmit = async (data: RegisterForm) => {
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
       await signup(data.email, data.password);
     } catch (error: any) {
       setError('email', { message: error.message || 'Erro no cadastro' });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -69,7 +70,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             type="email"
             placeholder="seu@email.com"
             {...register('email')}
-            disabled={isLoading}
+            disabled={isSubmitting}
           />
           {errors.email && (
             <p className="text-sm text-red-500">{errors.email.message}</p>
@@ -83,7 +84,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             type="password"
             placeholder="••••••••"
             {...register('password')}
-            disabled={isLoading}
+            disabled={isSubmitting}
           />
           {errors.password && (
             <p className="text-sm text-red-500">{errors.password.message}</p>
@@ -97,7 +98,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             type="password"
             placeholder="••••••••"
             {...register('confirmPassword')}
-            disabled={isLoading}
+            disabled={isSubmitting}
           />
           {errors.confirmPassword && (
             <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
@@ -107,9 +108,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <Button
           onClick={handleSubmit(onSubmit)}
           className="w-full"
-          disabled={isLoading}
+          disabled={isSubmitting}
         >
-          {isLoading ? 'Criando conta...' : 'Criar Conta'}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Criando conta...
+            </>
+          ) : (
+            'Criar Conta'
+          )}
         </Button>
         
         <div className="text-center text-sm text-gray-600">
@@ -118,6 +126,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             type="button"
             onClick={onSwitchToLogin}
             className="text-blue-600 hover:text-blue-800 font-medium"
+            disabled={isSubmitting}
           >
             Faça login
           </button>

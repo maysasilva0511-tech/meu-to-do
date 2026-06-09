@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthActions } from '@/hooks/auth';
+import { Loader2 } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -28,6 +29,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   const { login } = useAuthActions();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   
   const {
     register,
@@ -39,13 +41,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   });
 
   const onSubmit = async (data: LoginForm) => {
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
       await login(data.email, data.password);
     } catch (error: any) {
       setError('email', { message: error.message || 'Credenciais inválidas' });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -65,7 +67,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             type="email"
             placeholder="seu@email.com"
             {...register('email')}
-            disabled={isLoading}
+            disabled={isSubmitting}
           />
           {errors.email && (
             <p className="text-sm text-red-500">{errors.email.message}</p>
@@ -79,7 +81,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             type="password"
             placeholder="••••••••"
             {...register('password')}
-            disabled={isLoading}
+            disabled={isSubmitting}
           />
           {errors.password && (
             <p className="text-sm text-red-500">{errors.password.message}</p>
@@ -89,9 +91,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         <Button
           onClick={handleSubmit(onSubmit)}
           className="w-full"
-          disabled={isLoading}
+          disabled={isSubmitting}
         >
-          {isLoading ? 'Entrando...' : 'Entrar'}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Entrando...
+            </>
+          ) : (
+            'Entrar'
+          )}
         </Button>
         
         <div className="text-center text-sm text-gray-600">
@@ -100,6 +109,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             type="button"
             onClick={onSwitchToRegister}
             className="text-blue-600 hover:text-blue-800 font-medium"
+            disabled={isSubmitting}
           >
             Cadastre-se
           </button>
