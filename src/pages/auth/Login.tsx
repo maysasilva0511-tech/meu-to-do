@@ -9,6 +9,7 @@ import { AuthButtons } from '@/components/auth/AuthButtons';
 import { Database, AlertCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const loginSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -20,6 +21,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 export const Login: React.FC = () => {
   const [isLoginForm, setIsLoginForm] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const navigate = useNavigate();
   
   const {
     register,
@@ -46,7 +48,7 @@ export const Login: React.FC = () => {
       // Login bem sucedido - redirecionar para dashboard
       console.log('Login bem sucedido, redirecionando para /');
       toast.success('Login realizado com sucesso!');
-      window.location.href = '/';
+      navigate('/');
       
     } catch (error: any) {
       setError('email', { message: 'Ocorreu um erro ao tentar fazer login' });
@@ -55,13 +57,33 @@ export const Login: React.FC = () => {
     }
   };
 
-  const handleSocialLogin = (provider: 'google' | 'github' | 'supabase') => {
-    if (provider === 'supabase') {
-      // Login com Supabase - usa o mesmo formulário de login
-      handleSubmit(onSubmit)();
-    } else {
-      // Login social - mostrar alerta temporário
-      toast.info(`Login com ${provider === 'google' ? 'Google' : 'GitHub'} em desenvolvimento. Por favor, use o login por e-mail.`);
+  const handleSocialLogin = (provider: 'google' | 'github' => {
+    // Login social - mostrar alerta temporário
+    toast.info(`Login com ${provider === 'google' ? 'Google' : 'GitHub'} em desenvolvimento. Por favor, use o login por e-mail.`);
+  };
+
+  const handleSupabaseLogin = async () => {
+    setIsSubmitting(true);
+    try {
+      const { error, data: authData } = await supabase.auth.signInWithPassword({
+        email: 'teste@teste.com',
+        password: '12345678'
+      });
+      
+      if (error) {
+        toast.error('Erro no login de demonstração: ' + error.message);
+        return;
+      }
+      
+      // Login de demonstração bem sucedido - redirecionar para dashboard
+      console.log('Login de demonstração bem sucedido, redirecionando para /');
+      toast.success('Login de demonstração realizado com sucesso!');
+      navigate('/');
+      
+    } catch (error: any) {
+      toast.error('Erro ao realizar login de demonstração: ' + error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -186,7 +208,7 @@ export const Login: React.FC = () => {
               </button>
               
               <button
-                onClick={() => handleSocialLogin('supabase')}
+                onClick={handleSupabaseLogin}
                 disabled={isSubmitting}
                 className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
