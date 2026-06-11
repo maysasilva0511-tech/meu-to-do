@@ -20,9 +20,15 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const navigate = useNavigate();
   
   const handleLogout = async () => {
+    // Se onLogout foi passado pelo pai, usa ele (já tem a lógica correta)
+    if (onLogout) {
+      onLogout();
+      return;
+    }
+    
+    // Fallback: lógica local caso não tenha prop
     try {
       await supabase.auth.signOut();
-      // Limpa qualquer estado local e redireciona
       navigate('/auth/login');
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
