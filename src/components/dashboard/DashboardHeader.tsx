@@ -1,4 +1,4 @@
-"use client";
+""use client";
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -13,88 +13,60 @@ interface DashboardHeaderProps {
   onLogout?: () => void;
 }
 
-export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ 
-  onCreateTask, 
-  onLogout 
+export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
+  onCreateTask,
+  onLogout
 }) => {
   const navigate = useNavigate();
-  
+
   const handleLogout = async () => {
-    console.log('Logout button clicked, onLogout prop:', typeof onLogout);
-    
-    // Se onLogout foi passado pelo pai, usa ele
-    if (onLogout) {
-      try {
-        console.log('Calling parent onLogout...');
-        await onLogout();
-        console.log('Parent onLogout completed');
-        navigate('/');
-      } catch (error) {
-        console.error('Error in parent onLogout:', error);
-        // Fallback
-        try {
-          await supabase.auth.signOut();
-          navigate('/auth/login');
-        } catch (fallbackError) {
-          console.error('Fallback logout error:', fallbackError);
-        }
-      }
-      return;
-    }
-    
-    // Fallback: lógica local caso não tenha prop
+    console.log('Forçando logout pelo Supabase...');
     try {
-      console.log('Using fallback logout...');
+      // 1. Desloga diretamente no banco de dados do Supabase
       await supabase.auth.signOut();
-      navigate('/auth/login');
+      console.log('Logout concluído com sucesso!');
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
+      console.error('Erro ao deslogar:', error);
+    } finally {
+      // 2. Garante o redirecionamento para a tela de login de qualquer forma
+      navigate('/');
     }
   };
 
   return (
-    <div className="bg-white shadow-sm border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Meu To Do</h1>
-            <Badge variant="secondary" className="ml-3">Beta</Badge>
+    <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6 lg:h-[60px]">
+      <div className="w-full flex-1">
+        <form>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Buscar tarefas..."
+              className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
+            />
           </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Buscar tarefas..."
-                className="pl-10 w-64"
-              />
-            </div>
-            
-            <Button onClick={onCreateTask} className="flex items-center space-x-2">
-              <Plus className="h-4 w-4" />
-              <span>Nova Tarefa</span>
-            </Button>
-            
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-            </Button>
-            
-            <div className="flex items-center space-x-2">
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleLogout}
-                className="text-gray-600 hover:text-red-600 hover:bg-red-50"
-              >
-                <LogOut className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
+        </form>
       </div>
-    </div>
+      
+      <Button size="sm" onClick={onCreateTask} className="gap-1">
+        <Plus className="h-4 w-4" />
+        <span>Nova Tarefa</span>
+      </Button>
+
+      <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
+        <Bell className="h-4 w-4" />
+        <span className="sr-only">Notificações</span>
+      </Button>
+      
+      <Button variant="outline" size="icon" className="h-8 w-8">
+        <User className="h-4 w-4" />
+        <span className="sr-only">Perfil</span>
+      </Button>
+
+      <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleLogout} title="Sair">
+        <LogOut className="h-4 w-4" />
+        <span className="sr-only">Sair</span>
+      </Button>
+    </header>
   );
 };
