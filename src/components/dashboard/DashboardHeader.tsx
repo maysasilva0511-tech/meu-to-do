@@ -28,6 +28,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         console.log('Calling parent onLogout...');
         await onLogout();
         console.log('Parent onLogout completed');
+        
       } catch (error) {
         console.error('Error in parent onLogout:', error);
         // Fallback
