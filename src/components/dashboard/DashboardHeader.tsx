@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,11 +22,13 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const handleLogout = async () => {
     console.log('Forçando logout pelo Supabase...');
     try {
+      // 1. Desloga diretamente no banco de dados do Supabase
       await supabase.auth.signOut();
       console.log('Logout concluído com sucesso!');
     } catch (error) {
       console.error('Erro ao deslogar:', error);
     } finally {
+      // 2. Garante o redirecionamento para a tela de login de qualquer forma
       navigate('/');
     }
   };
@@ -65,5 +69,4 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
       </Button>
     </header>
   );
-};
 };
