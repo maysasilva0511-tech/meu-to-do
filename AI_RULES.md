@@ -1,19 +1,81 @@
-# Tech Stack
+# AI_RULES.md - Meu To Do
 
-- You are building a React application.
-- Use TypeScript.
-- Use React Router. KEEP the routes in src/App.tsx
-- Always put source code in the src folder.
-- Put pages into src/pages/
-- Put components into src/components/
-- The main page (default page) is src/pages/Index.tsx
-- UPDATE the main page to include the new components. OTHERWISE, the user can NOT see any components!
-- ALWAYS try to use the shadcn/ui library.
-- Tailwind CSS: always use Tailwind CSS for styling components. Utilize Tailwind classes extensively for layout, spacing, colors, and other design aspects.
+## Visão Geral
+"Meu To Do" é um aplicativo de gerenciamento de tarefas personalizável com autenticação nativa do Supabase. O aplicativo permite que os usuários criem, gerenciem e personalizem suas listas de tarefas com diferentes categorias, prioridades e status.
 
-Available packages and libraries:
+## Stack Tecnológica
+- **Frontend**: React 19 com TypeScript
+- **Backend**: Supabase (autenticação, banco de dados, storage)
+- **UI**: Tailwind CSS + shadcn/ui
+- **Gerenciamento de Estado**: React Query
+- **Roteamento**: React Router
+- **Banco de Dados**: PostgreSQL (via Supabase)
 
-- The lucide-react package is installed for icons.
-- You ALREADY have ALL the shadcn/ui components and their dependencies installed. So you don't need to install them again.
-- You have ALL the necessary Radix UI components installed.
-- Use prebuilt components from the shadcn/ui library after importing them. Note that these files shouldn't be edited, so make new components if you need to change them.
+## Estrutura de Arquivos
+```
+src/
+├── components/          # Componentes reutilizáveis
+│   ├── ui/             # Componentes shadcn/ui
+│   ├── auth/           # Componentes de autenticação
+│   ├── tasks/          # Componentes de tarefas
+│   └── layout/         # Componentes de layout
+├── pages/              # Páginas principais
+│   ├── Auth/           # Páginas de autenticação
+│   ├── Dashboard/      # Dashboard principal
+│   └── Settings/       # Configurações
+├── hooks/              # Custom hooks
+├── services/           # Serviços (Supabase)
+├── utils/              # Funções utilitárias
+└── types/              # Tipos TypeScript
+```
+
+## Autenticação com Supabase
+O aplicativo utiliza a autenticação nativa do Supabase:
+- **Cadastro/login** com email/senha
+- **Login com provedores OAuth** (Google, GitHub)
+- **Gerenciamento de sessão**
+- **Funções de usuário** (admin, user)
+
+## Componentes Necessários
+### Autenticação
+- `LoginForm` - Formulário de login
+- `RegisterForm` - Formulário de cadastro
+- `AuthButtons` - Botões de login OAuth
+- `ProtectedRoute` - Rota protegida
+
+### Tarefas
+- `TaskList` - Lista de tarefas
+- `TaskItem` - Item individual de tarefa
+- `TaskForm` - Formulário de criação/edição
+- `CategoryFilter` - Filtro por categoria
+- `PriorityFilter` - Filtro por prioridade
+- `StatusFilter` - Filtro por status
+
+### Dashboard
+- `DashboardHeader` - Cabeçalho do dashboard
+- `StatsCards` - Cards de estatísticas
+- `TaskChart` - Gráfico de progresso
+- `QuickActions` - Ações rápidas
+
+## Estado e Dados
+- **React Query** para gerenciamento de estado
+- **Caching** de dados offline
+- **Sincronização** em tempo real
+- **Otimistic updates**
+
+## Design System
+- **Cores**: Primária azul, secundária cinza, alerta vermelho
+- **Tipografia**: Inter para títulos, Roboto para corpo
+- **Espaçamento**: Base 4px (padrão Tailwind)
+- **Bordas**: Radius 8px (md)
+- **Sombras**: Sistemas de sombras consistentes
+
+## Rotas
+- `/` - Dashboard (protegido)
+- `/auth/login` - Login
+- `/auth/register` - Cadastro
+- `/settings` - Configurações (protegido)
+
+## Variáveis de Ambiente
+- `VITE_SUPABASE_URL` - URL do Supabase
+- `VITE_SUPABASE_ANON_KEY` - Chave anônima do Supabase
