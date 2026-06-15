@@ -56,20 +56,10 @@ export const Dashboard = () => {
 
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <section className="mb-8 rounded-3xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur sm:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-2xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
-                Meu To Do
-              </p>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                Organize suas tarefas com segurança
-              </h1>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
-                Sua lista mostra apenas as tarefas criadas pelo usuário
-                autenticado. Ao salvar uma nova tarefa, ela aparece imediatamente
-                na Home.
-              </p>
-            </div>
+          <div className="max-w-2xl">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+              Meu To Do
+            </h1>
           </div>
         </section>
 
