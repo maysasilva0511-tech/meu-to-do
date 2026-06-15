@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Circle, Trash2 } from "lucide-react";
-import { Task } from "@/hooks/tasks";
+import { Task } from "@/services/supabase";
 
 interface TaskItemProps {
   task: Task;

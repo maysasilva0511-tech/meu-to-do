@@ -10,7 +10,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Task, useTasks } from "@/hooks/tasks";
+import { Task } from "@/services/supabase";
+import { useTasks } from "@/hooks/tasks";
 import { TaskItem } from "./TaskItem";
 
 interface TaskListProps {
@@ -23,6 +24,8 @@ export const TaskList = ({ tasks, onCreateTask }: TaskListProps) => {
     tasks: fetchedTasks = [],
     error,
     isLoading,
+    updateTaskStatus,
+    deleteTask,
   } = useTasks();
 
   const displayedTasks = tasks ?? fetchedTasks;
@@ -46,7 +49,7 @@ export const TaskList = ({ tasks, onCreateTask }: TaskListProps) => {
     });
   }, [displayedTasks, searchTerm, filterStatus]);
 
-  const pendingCount = displayedTasks.filter((task) => !task.is_completed).length;
+  const pendingCount = displayedTasks.filter((t) => !t.is_completed).length;
 
   if (isLoading) {
     return (
@@ -71,9 +74,6 @@ export const TaskList = ({ tasks, onCreateTask }: TaskListProps) => {
             <p className="text-sm font-medium text-destructive">
               Não foi possível carregar suas tarefas.
             </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {error instanceof Error ? error.message : "Tente novamente."}
-            </p>
             <Button
               variant="outline"
               className="mt-4"
@@ -95,7 +95,7 @@ export const TaskList = ({ tasks, onCreateTask }: TaskListProps) => {
             Suas tarefas
           </CardTitle>
           <CardDescription className="mt-1">
-            Apenas tarefas vinculadas ao seu usuário logado são exibidas.
+            Apenas tarefas vinculadas ao seu usuário são exibidas.
           </CardDescription>
         </div>
 
@@ -103,16 +103,16 @@ export const TaskList = ({ tasks, onCreateTask }: TaskListProps) => {
           <Input
             placeholder="Buscar tarefas..."
             value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="max-w-sm"
           />
 
           <select
             value={filterStatus}
-            onChange={(event) =>
-              setFilterStatus(event.target.value as "all" | "completed" | "pending")
+            onChange={(e) =>
+              setFilterStatus(e.target.value as "all" | "completed" | "pending")
             }
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="all">Todas</option>
             <option value="pending">Pendentes ({pendingCount})</option>
@@ -145,9 +145,9 @@ export const TaskList = ({ tasks, onCreateTask }: TaskListProps) => {
               <TaskItem
                 key={task.id}
                 task={task}
-                onStatusChange={(isCompleted) => {
-                  updateTaskStatus.mutate({ id: task.id, isCompleted });
-                }}
+                onStatusChange={(isCompleted) =>
+                  updateTaskStatus.mutate({ id: task.id, isCompleted })
+                }
                 onDelete={(id) => deleteTask.mutate(id)}
               />
             ))}

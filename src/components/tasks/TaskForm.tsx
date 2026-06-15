@@ -1,1 +1,153 @@
-"use client"; import { zodResolver } from "@hookform/resolvers/zod"; import { useForm } from "react-hook-form"; import { z } from "zod"; import { Button } from "@/components/ui/button"; import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"; import { Input } from "@/components/ui/input"; import { Label } from "@/components/ui/label"; import { toast } from "sonner"; import { useTasks } from "@/hooks/tasks"; const taskFormSchema = z.object({ title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"), description: z.string().optional(), priority: z.enum(["low", "medium", "high"]), dueDate: z.date().optional(), }); type TaskFormValues = z.infer<typeof taskFormSchema>; interface TaskFormProps { onSubmit: (data: TaskFormValues) => Promise<void> | void; onCancel?: () => void; isSubmitting?: boolean; } export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, onCancel, isSubmitting = false }) => { const { register, handleSubmit, formState: { errors }, reset, } = useForm<TaskFormValues>({ resolver: zodResolver(taskFormSchema), defaultValues: { title: "", description: "", priority: "medium", dueDate: "" }, }); const handleFormSubmit = async (data: TaskFormValues) => { try { await onSubmit(data); reset(); } catch (error) { toast.error("Erro ao criar tarefa: " + (error instanceof Error ? error.message : "Erro desconhecido")); } }; return ( <Card className="w-full border-0 shadow-2xl"> <CardHeader className="space-y-1 pb-4"> <CardTitle className="text-2xl font-bold tracking-tight"> Nova Tarefa </CardTitle> <CardDescription className="text-sm text-muted-foreground"> A tarefa será vinculada automaticamente ao usuário logado. </CardDescription> </CardHeader> <CardContent> <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4"> <div className="space-y-2"> <Label htmlFor="title" className="text-sm font-medium"> Título * </Label> <Input id="title" placeholder="Ex: Estudar React" disabled={isSubmitting} autoFocus {...register("title")} className="border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" /> {errors.title && ( <p className="text-sm text-red-500 mt-1">{errors.title.message}</p> )} </div> <div className="space-y-2"> <Label htmlFor="description" className="text-sm font-medium"> Descrição (opcional) </Label> <Input id="description" placeholder="Descreva a tarefa..." disabled={isSubmitting} {...register("description")} className="border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" /> </div> <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> <div className="space-y-2"> <Label htmlFor="priority" className="text-sm font-medium"> Prioridade * </Label> <select id="priority" value={data.priority} onChange={(e) => setValue("priority", e.target.value)} className="border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" > <option value="low">Baixa</option> <option value="medium">Média</option> <option value="high">Alta</option> </select> </div> <div className="space-y-2"> <Label htmlFor="dueDate" className="text-sm font-medium"> Data de Vencimento (opcional) </Label> <Input id="dueDate" type="date" disabled={isSubmitting} {...register("dueDate")} className="border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" /> </div> </div> <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md" disabled={isSubmitting}> {isSubmitting ? "Salvando..." : "Criar Tarefa"} </Button> </form> </CardContent> </Card> ); };
+"use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { useTasks } from "@/hooks/tasks";
+
+const taskFormSchema = z.object({
+  title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
+  description: z.string().optional(),
+  priority: z.enum(["low", "medium", "high"]),
+  dueDate: z.date().optional(),
+});
+
+type TaskFormValues = z.infer<typeof taskFormSchema>;
+
+interface TaskFormProps {
+  onSubmit: (data: TaskFormValues) => Promise<void> | void;
+  onCancel?: () => void;
+  isSubmitting?: boolean;
+}
+
+export const TaskForm: React.FC<TaskFormProps> = ({
+  onSubmit,
+  onCancel,
+  isSubmitting = false,
+}) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setValue,
+    watch,
+  } = useForm<TaskFormValues>({
+    resolver: zodResolver(taskFormSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      priority: "medium",
+      dueDate: undefined,
+    },
+  });
+
+  const selectedPriority = watch("priority");
+
+  const handleFormSubmit = async (data: TaskFormValues) => {
+    try {
+      await onSubmit(data);
+      reset();
+    } catch (error) {
+      toast.error(
+        "Erro ao criar tarefa: " +
+          (error instanceof Error ? error.message : "Erro desconhecido")
+      );
+    }
+  };
+
+  return (
+    <Card className="w-full border-0 shadow-2xl">
+      <CardHeader className="space-y-1 pb-4">
+        <CardTitle className="text-2xl font-bold tracking-tight">
+          Nova Tarefa
+        </CardTitle>
+        <CardDescription className="text-sm text-muted-foreground">
+          A tarefa será vinculada automaticamente ao usuário logado.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title" className="text-sm font-medium">
+              Título *
+            </Label>
+            <Input
+              id="title"
+              placeholder="Ex: Estudar React"
+              disabled={isSubmitting}
+              {...register("title")}
+            />
+            {errors.title && (
+              <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description" className="text-sm font-medium">
+              Descrição (opcional)
+            </Label>
+            <Input
+              id="description"
+              placeholder="Descreva a tarefa..."
+              disabled={isSubmitting}
+              {...register("description")}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="priority" className="text-sm font-medium">
+                Prioridade *
+              </Label>
+              <select
+                id="priority"
+                value={selectedPriority}
+                onChange={(e) => setValue("priority", e.target.value as any)}
+                className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="low">Baixa</option>
+                <option value="medium">Média</option>
+                <option value="high">Alta</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dueDate" className="text-sm font-medium">
+                Data de Vencimento (opcional)
+              </Label>
+              <Input
+                id="dueDate"
+                type="date"
+                disabled={isSubmitting}
+                {...register("dueDate")}
+              />
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Salvando..." : "Criar Tarefa"}
+          </Button>
+          {onCancel && (
+            <Button
+              type="button"
+              variant="outline"
+              className="ml-2"
+              onClick={onCancel}
+            >
+              Cancelar
+            </Button>
+          )}
+        </form>
+      </CardContent>
+    </Card>
+  );
+};

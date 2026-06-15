@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/components/ui/button";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { TaskForm } from "@/components/tasks/TaskForm";
@@ -12,11 +11,18 @@ import { useNavigate } from "react-router-dom";
 
 export const Dashboard = () => {
   const navigate = useNavigate();
-  const { tasks, isLoading, error, createTask } = useTasks();
+  const {
+    tasks = [],
+    isLoading,
+    error,
+    createTask,
+    refetch,
+  } = useTasks();
+
   const [isTaskModalOpen, setIsTaskModalOpen] = React.useState(false);
 
-  const completedCount = tasks.filter((task) => task.is_completed).length;
-  const pendingCount = tasks.filter((task) => !task.is_completed).length;
+  const completedCount = tasks.filter((t) => t.is_completed).length;
+  const pendingCount = tasks.filter((t) => !t.is_completed).length;
 
   const stats = {
     total: tasks.length,
@@ -28,6 +34,7 @@ export const Dashboard = () => {
   const handleCreateTask = async (data: { title: string }) => {
     await createTask.mutateAsync({ title: data.title });
     setIsTaskModalOpen(false);
+    refetch();
   };
 
   const handleLogout = async () => {
@@ -58,14 +65,6 @@ export const Dashboard = () => {
                 na Home.
               </p>
             </div>
-
-            <Button
-              size="lg"
-              className="shrink-0"
-              onClick={() => setIsTaskModalOpen(true)}
-            >
-              Nova tarefa
-            </Button>
           </div>
         </section>
 
@@ -84,13 +83,12 @@ export const Dashboard = () => {
               <p className="text-sm font-medium text-destructive">
                 Não foi possível carregar suas tarefas.
               </p>
-              <Button
-                variant="outline"
-                className="mt-4"
+              <button
+                className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                 onClick={() => window.location.reload()}
               >
                 Tentar novamente
-              </Button>
+              </button>
             </div>
           </div>
         ) : (
