@@ -8,16 +8,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 const taskFormSchema = z.object({
   title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
+  description: z.string().optional(),
+  priority: z.enum(["low", "medium", "high"]).default("medium"),
+  dueDate: z.string().optional(),
 });
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
 
 interface TaskFormProps {
-  onSubmit: (title: string) => Promise<void> | void;
+  onSubmit: (data: TaskFormValues) => Promise<void> | void;
   onCancel?: () => void;
   isSubmitting?: boolean;
 }
@@ -32,21 +37,24 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
+    watch,
   } = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
       title: "",
+      priority: "medium",
     },
   });
 
   const handleFormSubmit = async (data: TaskFormValues) => {
     try {
-      await onSubmit(data.title);
+      await onSubmit(data);
       reset();
     } catch (error) {
       toast.error(
         "Erro ao criar tarefa: " +
-          (error instanceof Error ? error.message : "Erro desconhecido")
+          (error instanceof Error ? error.message : "Erro desconhecido"),
       );
     }
   };
@@ -79,6 +87,52 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 {errors.title.message}
               </p>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description" className="text-sm font-medium">
+              Descrição
+            </Label>
+            <Textarea
+              id="description"
+              placeholder="Detalhes da tarefa..."
+              rows={3}
+              disabled={isSubmitting}
+              {...register("description")}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="priority" className="text-sm font-medium">
+                Prioridade
+              </Label>
+              <Select
+                value={watch("priority")}
+                onValueChange={(value) => setValue("priority", value as "low" | "medium" | "high")}
+              >
+                <SelectTrigger className="border border-input">
+                  <SelectValue placeholder="Selecione a prioridade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Baixa</SelectItem>
+                  <SelectItem value="medium">Média</SelectItem>
+                  <SelectItem value="high">Alta</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dueDate" className="text-sm font-medium">
+                Data de Vencimento
+              </Label>
+              <Input
+                id="dueDate"
+                type="date"
+                disabled={isSubmitting}
+                {...register("dueDate")}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-end">

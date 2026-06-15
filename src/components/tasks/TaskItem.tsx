@@ -2,14 +2,26 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, Circle, Trash2 } from "lucide-react";
-import { Todo } from "@/services/supabase";
+import { CheckCircle, Circle, Trash2, Clock, AlertCircle } from "lucide-react";
+import { Task } from "@/hooks/tasks";
 
 interface TaskItemProps {
-  task: Todo;
-  onStatusChange: (isCompleted: boolean) => void;
-  onDelete: (id: number) => void;
+  task: Task;
+  onStatusChange: (status: string) => void;
+  onDelete: (id: string) => void;
 }
+
+const statusConfig = {
+  pending: { label: "Pendente", icon: Circle, color: "text-slate-400", bg: "bg-slate-100" },
+  in_progress: { label: "Em Progresso", icon: Clock, color: "text-blue-600", bg: "bg-blue-100" },
+  completed: { label: "Concluída", icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-100" },
+};
+
+const priorityConfig = {
+  low: { label: "Baixa", color: "text-slate-600", bg: "bg-slate-100" },
+  medium: { label: "Média", color: "text-amber-600", bg: "bg-amber-100" },
+  high: { label: "Alta", color: "text-red-600", bg: "bg-red-100" },
+};
 
 export const TaskItem = ({ task, onStatusChange, onDelete }: TaskItemProps) => {
   const formattedDate = new Intl.DateTimeFormat("pt-BR", {
@@ -19,6 +31,10 @@ export const TaskItem = ({ task, onStatusChange, onDelete }: TaskItemProps) => {
     minute: "2-digit",
   }).format(new Date(task.created_at));
 
+  const status = statusConfig[task.status];
+  const priority = priorityConfig[task.priority];
+  const StatusIcon = status.icon;
+
   return (
     <Card className="group border border-slate-200 bg-white transition hover:border-blue-200 hover:shadow-md">
       <CardContent className="flex items-center gap-3 p-4">
@@ -27,32 +43,51 @@ export const TaskItem = ({ task, onStatusChange, onDelete }: TaskItemProps) => {
           variant="ghost"
           size="icon"
           className="h-10 w-10 shrink-0 rounded-full"
-          onClick={() => onStatusChange(!task.is_completed)}
-          aria-label={
-            task.is_completed ? "Marcar tarefa como pendente" : "Concluir tarefa"
-          }
+          onClick={() => {
+            const nextStatus =
+              task.status === "completed"
+                ? "pending"
+                : task.status === "pending"
+                  ? "in_progress"
+                  : "completed";
+            onStatusChange(nextStatus);
+          }}
+          aria-label={`Alterar status para ${status.label}`}
         >
-          {task.is_completed ? (
-            <CheckCircle className="h-5 w-5 text-emerald-600" />
-          ) : (
-            <Circle className="h-5 w-5 text-slate-400" />
-          )}
+          <StatusIcon className={`h-5 w-5 ${status.color}`} />
         </Button>
 
         <div className="min-w-0 flex-1">
-          <h3
-            className={[
-              "truncate text-base font-semibold transition",
-              task.is_completed
-                ? "text-muted-foreground line-through"
-                : "text-slate-900",
-            ].join(" ")}
-          >
-            {task.title ?? "Sem título"}
-          </h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Criada em {formattedDate}
-          </p>
+          <div className="flex items-center gap-2">
+            <h3
+              className={[
+                "truncate text-base font-semibold transition",
+                task.status === "completed"
+                  ? "text-muted-foreground line-through"
+                  : "text-slate-900",
+              ].join(" ")}
+            >
+              {task.title ?? "Sem título"}
+            </h3>
+            <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${priority.bg} ${priority.color}`}>
+              {priority.label}
+            </span>
+          </div>
+          <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+            <span>Criada em {formattedDate}</span>
+            <span className={`px-2 py-0.5 rounded-full ${status.bg} ${status.color}`}>
+              {status.label}
+            </span>
+            {task.due_date && (
+              <span className="text-amber-600">
+                Vence:{" "}
+                {new Intl.DateTimeFormat("pt-BR", {
+                  day: "2-digit",
+                  month: "short",
+                }).format(new Date(task.due_date))}
+              </span>
+            )}
+          </div>
         </div>
 
         <Button

@@ -23,18 +23,21 @@ export const Dashboard = () => {
 
   const [isTaskModalOpen, setIsTaskModalOpen] = React.useState(false);
 
-  const completedCount = tasks.filter((t) => t.is_completed).length;
-  const pendingCount = tasks.filter((t) => !t.is_completed).length;
+  const completedCount = tasks.filter((t) => t.status === "completed").length;
+  const pendingCount = tasks.filter((t) => t.status === "pending").length;
+  const inProgressCount = tasks.filter(
+    (t) => t.status === "in_progress",
+  ).length;
 
   const stats = {
     total: tasks.length,
     completed: completedCount,
     pending: pendingCount,
-    inProgress: 0,
+    inProgress: inProgressCount,
   };
 
-  const handleCreateTask = async (title: string) => {
-    await createTask.mutateAsync(title);
+  const handleCreateTask = async (data: any) => {
+    await createTask.mutateAsync(data);
     setIsTaskModalOpen(false);
     refetch();
   };
@@ -99,8 +102,8 @@ export const Dashboard = () => {
             <TaskList
               tasks={tasks}
               onCreateTask={() => setIsTaskModalOpen(true)}
-              onStatusChange={(id, isCompleted) =>
-                updateTaskStatus.mutate({ id, isCompleted })
+              onStatusChange={(id, status) =>
+                updateTaskStatus.mutate({ id, status })
               }
               onDelete={(id) => deleteTask.mutate(id)}
             />

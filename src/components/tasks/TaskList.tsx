@@ -10,14 +10,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Todo } from "@/services/supabase";
+import { Task } from "@/hooks/tasks";
 import { TaskItem } from "./TaskItem";
 
 interface TaskListProps {
-  tasks: Todo[];
+  tasks: Task[];
   onCreateTask?: () => void;
-  onStatusChange: (id: number, isCompleted: boolean) => void;
-  onDelete: (id: number) => void;
+  onStatusChange: (id: string, status: string) => void;
+  onDelete: (id: string) => void;
 }
 
 export const TaskList = ({
@@ -28,7 +28,7 @@ export const TaskList = ({
 }: TaskListProps) => {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [filterStatus, setFilterStatus] = React.useState<
-    "all" | "completed" | "pending"
+    "all" | "completed" | "pending" | "in_progress"
   >("all");
 
   const filteredTasks = React.useMemo(() => {
@@ -38,15 +38,19 @@ export const TaskList = ({
         .includes(searchTerm.toLowerCase());
 
       const matchesStatus =
-        filterStatus === "all" ||
-        (filterStatus === "completed" && task.is_completed) ||
-        (filterStatus === "pending" && !task.is_completed);
+        filterStatus === "all" || task.status === filterStatus;
 
       return matchesSearch && matchesStatus;
     });
   }, [tasks, searchTerm, filterStatus]);
 
-  const pendingCount = tasks.filter((task) => !task.is_completed).length;
+  const pendingCount = tasks.filter((task) => task.status === "pending").length;
+  const inProgressCount = tasks.filter(
+    (task) => task.status === "in_progress",
+  ).length;
+  const completedCount = tasks.filter(
+    (task) => task.status === "completed",
+  ).length;
 
   return (
     <Card className="border-0 shadow-sm">
@@ -71,13 +75,16 @@ export const TaskList = ({
           <select
             value={filterStatus}
             onChange={(e) =>
-              setFilterStatus(e.target.value as "all" | "completed" | "pending")
+              setFilterStatus(
+                e.target.value as "all" | "completed" | "pending" | "in_progress",
+              )
             }
             className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <option value="all">Todas</option>
+            <option value="all">Todas ({tasks.length})</option>
             <option value="pending">Pendentes ({pendingCount})</option>
-            <option value="completed">Concluídas</option>
+            <option value="in_progress">Em Progresso ({inProgressCount})</option>
+            <option value="completed">Concluídas ({completedCount})</option>
           </select>
         </div>
       </CardHeader>
@@ -106,9 +113,7 @@ export const TaskList = ({
               <TaskItem
                 key={task.id}
                 task={task}
-                onStatusChange={(isCompleted) =>
-                  onStatusChange(task.id, isCompleted)
-                }
+                onStatusChange={(status) => onStatusChange(task.id, status)}
                 onDelete={(id) => onDelete(id)}
               />
             ))}
