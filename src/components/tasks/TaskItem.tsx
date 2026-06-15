@@ -3,19 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Circle, Trash2 } from "lucide-react";
-import { Task } from "@/services/supabase";
+import { Todo } from "@/services/supabase";
 
 interface TaskItemProps {
-  task: Task;
+  task: Todo;
   onStatusChange: (isCompleted: boolean) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
 }
 
-export const TaskItem = ({
-  task,
-  onStatusChange,
-  onDelete,
-}: TaskItemProps) => {
+export const TaskItem = ({ task, onStatusChange, onDelete }: TaskItemProps) => {
   const formattedDate = new Intl.DateTimeFormat("pt-BR", {
     day: "2-digit",
     month: "short",
@@ -52,7 +48,7 @@ export const TaskItem = ({
                 : "text-slate-900",
             ].join(" ")}
           >
-            {task.title}
+            {task.title ?? "Sem título"}
           </h3>
           <p className="mt-1 text-xs text-muted-foreground">
             Criada em {formattedDate}

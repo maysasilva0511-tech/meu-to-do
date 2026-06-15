@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthActions } from '@/hooks/auth';
 import { Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const registerSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -22,18 +23,11 @@ const registerSchema = z.object({
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
-interface RegisterFormProps {
-  onSwitchToLogin: () => void;
-  onLoginWithOAuth: (provider: 'google' | 'github') => void;
-}
-
-export const RegisterForm: React.FC<RegisterFormProps> = ({ 
-  onSwitchToLogin, 
-  onLoginWithOAuth 
-}) => {
+export const RegisterForm: React.FC = () => {
+  const navigate = useNavigate();
   const { signup } = useAuthActions();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  
+
   const {
     register,
     handleSubmit,
@@ -45,6 +39,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
   const onSubmit = async (data: RegisterForm) => {
     setIsSubmitting(true);
+
     try {
       await signup(data.email, data.password);
     } catch (error: any) {
@@ -76,7 +71,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             <p className="text-sm text-red-500">{errors.email.message}</p>
           )}
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="password">Senha</Label>
           <Input
@@ -90,7 +85,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             <p className="text-sm text-red-500">{errors.password.message}</p>
           )}
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">Confirmar Senha</Label>
           <Input
@@ -104,8 +99,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
           )}
         </div>
-        
+
         <Button
+          type="submit"
           onClick={handleSubmit(onSubmit)}
           className="w-full"
           disabled={isSubmitting}
@@ -119,12 +115,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             'Criar Conta'
           )}
         </Button>
-        
+
         <div className="text-center text-sm text-gray-600">
           Já tem conta?{' '}
           <button
             type="button"
-            onClick={onSwitchToLogin}
+            onClick={() => navigate('/auth/login')}
             className="text-blue-600 hover:text-blue-800 font-medium"
             disabled={isSubmitting}
           >

@@ -10,33 +10,30 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Task } from "@/services/supabase";
-import { useTasks } from "@/hooks/tasks";
+import { Todo } from "@/services/supabase";
 import { TaskItem } from "./TaskItem";
 
 interface TaskListProps {
-  tasks?: Task[];
+  tasks: Todo[];
   onCreateTask?: () => void;
+  onStatusChange: (id: number, isCompleted: boolean) => void;
+  onDelete: (id: number) => void;
 }
 
-export const TaskList = ({ tasks, onCreateTask }: TaskListProps) => {
-  const {
-    tasks: fetchedTasks = [],
-    error,
-    isLoading,
-    updateTaskStatus,
-    deleteTask,
-  } = useTasks();
-
-  const displayedTasks = tasks ?? fetchedTasks;
+export const TaskList = ({
+  tasks,
+  onCreateTask,
+  onStatusChange,
+  onDelete,
+}: TaskListProps) => {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [filterStatus, setFilterStatus] = React.useState<
     "all" | "completed" | "pending"
   >("all");
 
   const filteredTasks = React.useMemo(() => {
-    return displayedTasks.filter((task) => {
-      const matchesSearch = task.title
+    return tasks.filter((task) => {
+      const matchesSearch = (task.title ?? "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
 
@@ -47,45 +44,9 @@ export const TaskList = ({ tasks, onCreateTask }: TaskListProps) => {
 
       return matchesSearch && matchesStatus;
     });
-  }, [displayedTasks, searchTerm, filterStatus]);
+  }, [tasks, searchTerm, filterStatus]);
 
-  const pendingCount = displayedTasks.filter((t) => !t.is_completed).length;
-
-  if (isLoading) {
-    return (
-      <Card className="border-0 shadow-sm">
-        <CardContent className="flex min-h-[240px] items-center justify-center">
-          <div className="text-center">
-            <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-            <p className="text-sm text-muted-foreground">
-              Carregando suas tarefas...
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card className="border-0 shadow-sm">
-        <CardContent className="flex min-h-[240px] items-center justify-center">
-          <div className="max-w-md text-center">
-            <p className="text-sm font-medium text-destructive">
-              Não foi possível carregar suas tarefas.
-            </p>
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={() => window.location.reload()}
-            >
-              Tentar novamente
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const pendingCount = tasks.filter((task) => !task.is_completed).length;
 
   return (
     <Card className="border-0 shadow-sm">
@@ -146,9 +107,9 @@ export const TaskList = ({ tasks, onCreateTask }: TaskListProps) => {
                 key={task.id}
                 task={task}
                 onStatusChange={(isCompleted) =>
-                  updateTaskStatus.mutate({ id: task.id, isCompleted })
+                  onStatusChange(task.id, isCompleted)
                 }
-                onDelete={(id) => deleteTask.mutate(id)}
+                onDelete={(id) => onDelete(id)}
               />
             ))}
           </div>

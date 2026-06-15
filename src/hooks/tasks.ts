@@ -1,102 +1,88 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../lib/supabaseClient';
 import { toast } from 'sonner';
+import { Todo, todoService } from '@/services/supabase';
 import { useAuth } from './auth';
 
 export const useTasks = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: tasks, error, isLoading, refetch } = useQuery({
-    queryKey: ['tasks', user?.id],
+  const { data: tasks = [], error, isLoading, refetch } = useQuery<Todo[]>({
+    queryKey: ['todos', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      
+
+      const { data, error } = await todoService.list(user.id);
       if (error) throw error;
-      return data || [];
+
+      return data ?? [];
     },
     enabled: !!user,
-    staleTime: 5 * 60 * 1000,
   });
 
   const createTask = useMutation({
-    mutationFn: async (task: { title: string; description?: string; priority?: string }) => {
+    mutationFn: async (title: string) => {
       if (!user) throw new Error('Usuário não autenticado');
-      
-      const { data, error } = await supabase
-        .from('tasks')
-        .insert([{ 
-          title: task.title,
-          description: task.description,
-          priority: task.priority || 'medium',
-          user_id: user.id,
-          status: 'pending',
-          created_at: new Date().toISOString()
-        }])
-        .select();
-      
+
+      const { data, error } = await todoService.create({
+        title,
+        user_id: user.id,
+        is_completed: false,
+      });
+
       if (error) throw error;
-      return data[0];
+
+      return data?.[0];
     },
     onSuccess: () => {
       toast.success('Tarefa criada com sucesso!');
-      queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['todos', user?.id] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Erro ao criar tarefa: ' + error.message);
-    }
+    },
   });
 
   const updateTaskStatus = useMutation({
-    mutationFn: async ({ id, isCompleted }: { id: string; isCompleted: boolean }) => {
-      const { data, error } = await supabase
-        .from('tasks')
-        .update({ is_completed: isCompleted })
-        .eq('id', id)
-        .select();
-      
+    mutationFn: async ({ id, isCompleted }: { id: number; isCompleted: boolean }) => {
+      const { data, error } = await todoService.update(id, {
+        is_completed: isCompleted,
+      });
+
       if (error) throw error;
-      return data[0];
+
+      return data?.[0];
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['todos', user?.id] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Erro ao atualizar tarefa: ' + error.message);
-    }
+    },
   });
 
   const deleteTask = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('tasks')
-        .delete()
-        .eq('id', id);
-      
+    mutationFn: async (id: number) => {
+      const { error } = await todoService.delete(id);
+
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success('Tarefa deletada com sucesso!');
-      queryClient.invalidateQueries({ queryKey: ['tasks', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['todos', user?.id] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error('Erro ao deletar tarefa: ' + error.message);
-    }
+    },
   });
 
-  return { 
-    tasks, 
-    error, 
-    isLoading, 
-    createTask, 
-    updateTaskStatus, 
+  return {
+    tasks,
+    error,
+    isLoading,
+    createTask,
+    updateTaskStatus,
     deleteTask,
-    refetch
+    refetch,
   };
 };

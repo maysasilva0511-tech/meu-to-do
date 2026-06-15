@@ -16,6 +16,8 @@ export const Dashboard = () => {
     isLoading,
     error,
     createTask,
+    updateTaskStatus,
+    deleteTask,
     refetch,
   } = useTasks();
 
@@ -31,8 +33,8 @@ export const Dashboard = () => {
     inProgress: 0,
   };
 
-  const handleCreateTask = async (data: { title: string }) => {
-    await createTask.mutateAsync({ title: data.title });
+  const handleCreateTask = async (title: string) => {
+    await createTask.mutateAsync(title);
     setIsTaskModalOpen(false);
     refetch();
   };
@@ -94,7 +96,14 @@ export const Dashboard = () => {
         ) : (
           <>
             <StatsCards stats={stats} />
-            <TaskList tasks={tasks} onCreateTask={() => setIsTaskModalOpen(true)} />
+            <TaskList
+              tasks={tasks}
+              onCreateTask={() => setIsTaskModalOpen(true)}
+              onStatusChange={(id, isCompleted) =>
+                updateTaskStatus.mutate({ id, isCompleted })
+              }
+              onDelete={(id) => deleteTask.mutate(id)}
+            />
           </>
         )}
       </main>

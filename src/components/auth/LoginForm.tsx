@@ -19,18 +19,10 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-interface LoginFormProps {
-  onSwitchToRegister: () => void;
-  onLoginWithOAuth: (provider: 'google' | 'github') => void;
-}
-
-export const LoginForm: React.FC<LoginFormProps> = ({ 
-  onSwitchToRegister, 
-  onLoginWithOAuth 
-}) => {
+export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  
+
   const {
     register,
     handleSubmit,
@@ -42,26 +34,20 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   const onSubmit = async (data: LoginForm) => {
     setIsSubmitting(true);
-    try {
-      const { error, data: authData } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password
-      });
-      
-      if (error) {
-        setError('email', { message: error.message || 'Credenciais inválidas' });
-        return;
-      }
-      
-      // Login bem sucedido - redirecionar para dashboard
-      console.log('Login bem sucedido, redirecionando para /');
-      navigate('/');
-      
-    } catch (error: any) {
-      setError('email', { message: 'Ocorreu um erro ao tentar fazer login' });
-    } finally {
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password
+    });
+
+    if (error) {
+      setError('email', { message: error.message || 'Credenciais inválidas' });
       setIsSubmitting(false);
+      return;
     }
+
+    navigate('/');
+    setIsSubmitting(false);
   };
 
   return (
@@ -85,7 +71,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
               )}
             </div>
-            
+
             <div>
               <Label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Senha
@@ -103,7 +89,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               )}
             </div>
           </div>
-          
+
           <Button
             type="submit"
             disabled={isSubmitting}
@@ -119,13 +105,13 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             )}
           </Button>
         </form>
-        
+
         <div className="text-center mt-6">
           <p className="text-sm text-gray-600">
             Não tem conta?{' '}
             <button
               type="button"
-              onClick={onSwitchToRegister}
+              onClick={() => navigate('/auth/register')}
               className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
               disabled={isSubmitting}
             >
