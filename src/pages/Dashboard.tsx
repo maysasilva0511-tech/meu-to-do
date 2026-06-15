@@ -56,8 +56,8 @@ export const Dashboard = () => {
 
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <section className="mb-8 rounded-3xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur sm:p-8">
-          <div className="max-w-2xl">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+          <div className="max-w-2xl mx-auto text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-blue-600">
               Meu To Do
             </h1>
           </div>
