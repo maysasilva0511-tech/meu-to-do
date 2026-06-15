@@ -8,6 +8,7 @@ import { TaskList } from "@/components/tasks/TaskList";
 import { useTasks } from "@/hooks/tasks";
 import { supabase } from "@/lib/supabaseClient";
 import { useNavigate } from "react-router-dom";
+import { Calendar } from "lucide-react";
 
 export const Dashboard = () => {
   const navigate = useNavigate();
@@ -57,9 +58,12 @@ export const Dashboard = () => {
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <section className="mb-8 rounded-3xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur sm:p-8">
           <div className="max-w-2xl mx-auto text-center">
-            <h1 className="text-3xl font-bold tracking-tight text-blue-600">
-              Meu To Do
-            </h1>
+            <div className="flex flex-col items-center gap-2">
+              <Calendar className="h-8 w-8 text-blue-600" />
+              <h1 className="text-3xl font-bold tracking-tight text-blue-600">
+                Meu To Do
+              </h1>
+            </div>
           </div>
         </section>
 
