@@ -71,6 +71,26 @@ export const useTasks = () => {
     },
   });
 
+  const updateTask = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Task> }) => {
+      const { data, error } = await supabase
+        .from("tasks")
+        .update(updates)
+        .eq("id", id)
+        .select();
+
+      if (error) throw error;
+      return data?.[0];
+    },
+    onSuccess: () => {
+      toast.success("Tarefa atualizada com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["tasks", user?.id] });
+    },
+    onError: (error: any) => {
+      toast.error("Erro ao atualizar tarefa: " + error.message);
+    },
+  });
+
   const updateTaskStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { data, error } = await supabase
@@ -113,6 +133,7 @@ export const useTasks = () => {
     error,
     isLoading,
     createTask,
+    updateTask,
     updateTaskStatus,
     deleteTask,
     refetch,
