@@ -39,7 +39,7 @@ export const TaskItem = ({
   onDelete,
   onEdit,
 }: TaskItemProps) => {
-  const { updateTask } = useTasks(); // mutation for updating any task field
+  const { updateTask } = useTasks(); // ✅ Use a mutation que permite atualizar qualquer campo
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title ?? "");
 
@@ -61,9 +61,10 @@ export const TaskItem = ({
       );
       if (confirmed) {
         try {
+          // ✅ Chama a mutation correta para atualizar o título
           await updateTask.mutateAsync({
             id: task.id,
-            updates: { title: editTitle.trim() },
+            updates: { title: editTitle.trim() }, // Atualiza apenas o título
           });
           setIsEditing(false);
         } catch (error) {
