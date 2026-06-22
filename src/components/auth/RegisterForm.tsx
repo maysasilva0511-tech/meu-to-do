@@ -1,0 +1,133 @@
+"use client";
+
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuthActions } from '@/hooks/auth';
+import { Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+const registerSchema = z.object({
+  email: z.string().email('E-mail inválido'),
+  password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"],
+});
+
+type RegisterForm = z.infer<typeof registerSchema>;
+
+export const RegisterForm: React.FC = () => {
+  const navigate = useNavigate();
+  const { signup } = useAuthActions();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm<RegisterForm>({
+    resolver: zodResolver(registerSchema),
+  });
+
+  const onSubmit = async (data: RegisterForm) => {
+    setIsSubmitting(true);
+
+    try {
+      await signup(data.email, data.password);
+    } catch (error: any) {
+      setError('email', { message: error.message || 'Erro no cadastro' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Card className="w-full max-w-md">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold text-center">Criar Conta</CardTitle>
+        <CardDescription className="text-center">
+          Crie sua conta para começar a gerenciar suas tarefas
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">E-mail</Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="seu@email.com"
+            {...register('email')}
+            disabled={isSubmitting}
+          />
+          {errors.email && (
+            <p className="text-sm text-red-500">{errors.email.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="password">Senha</Label>
+          <Input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            {...register('password')}
+            disabled={isSubmitting}
+          />
+          {errors.password && (
+            <p className="text-sm text-red-500">{errors.password.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Confirmar Senha</Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            placeholder="••••••••"
+            {...register('confirmPassword')}
+            disabled={isSubmitting}
+          />
+          {errors.confirmPassword && (
+            <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+          )}
+        </div>
+
+        <Button
+          type="submit"
+          onClick={handleSubmit(onSubmit)}
+          className="w-full"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Criando conta...
+            </>
+          ) : (
+            'Criar Conta'
+          )}
+        </Button>
+
+        <div className="text-center text-sm text-gray-600">
+          Já tem conta?{' '}
+          <button
+            type="button"
+            onClick={() => navigate('/auth/login')}
+            className="text-blue-600 hover:text-blue-800 font-medium"
+            disabled={isSubmitting}
+          >
+            Faça login
+          </button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
