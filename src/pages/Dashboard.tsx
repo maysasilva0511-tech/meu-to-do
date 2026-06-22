@@ -47,4 +47,9 @@ export const Dashboard = () => {
     await supabase.auth.signOut();
     navigate("/auth/login");
   };
-  
+  const handleConfirmDelete = (id: string) => {
+    const certeza = window.confirm("Tem certeza que deseja excluir esta tarefa?");
+    if (certeza) {
+      deleteTask.mutate(id);
+    }
+  };
