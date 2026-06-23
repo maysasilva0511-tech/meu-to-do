@@ -39,7 +39,7 @@ export const TaskItem = ({
   onDelete,
   onEdit,
 }: TaskItemProps) => {
-  const { updateTask } = useTasks(); // ✅ Use a mutation que permite atualizar qualquer campo
+  const { updateTask } = useTasks(); // ✅ Mutation for updating any field (used for title edits)
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title ?? "");
 
@@ -50,8 +50,9 @@ export const TaskItem = ({
     minute: "2-digit",
   }).format(new Date(task.created_at));
 
-  const status = statusConfig[task.status];
-  const priority = priorityConfig[task.priority];
+  // Safe fallbacks for status and priority configs
+  const status = statusConfig[task.status] ?? statusConfig['pending'];
+  const priority = priorityConfig[task.priority] ?? priorityConfig['medium'];
   const StatusIcon = status.icon;
 
   const handleSaveEdit = async () => {
@@ -104,7 +105,7 @@ export const TaskItem = ({
                 : task.status === "pending"
                   ? "in_progress"
                   : "completed";
-            onStatusChange(task.id, nextStatus);
+            onStatusChange(nextStatus);
           }}
           aria-label={`Alterar status para ${status.label}`}
         >
