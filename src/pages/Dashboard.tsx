@@ -63,7 +63,8 @@ export const Dashboard = () => {
     if (novoTexto !== null && novoTexto.trim() !== "") {
       const certeza = window.confirm(`Confirma a alteração para: "${novoTexto}"?`);
       if (certeza) {
-        updateTaskStatus.mutate({ id, title: novoTexto });
+        // Use updateTask instead of updateTaskStatus to change the title
+        updateTask.mutate({ id, updates: { title: novoTexto } });
       }
     }
   };
