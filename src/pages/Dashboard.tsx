@@ -17,6 +17,7 @@ export const Dashboard = () => {
     isLoading,
     error,
     createTask,
+    updateTask,          // <-- added
     updateTaskStatus,
     deleteTask,
     restoreTask,
@@ -63,7 +64,7 @@ export const Dashboard = () => {
     if (novoTexto !== null && novoTexto.trim() !== "") {
       const certeza = window.confirm(`Confirma a alteração para: "${novoTexto}"?`);
       if (certeza) {
-        // Use updateTask instead of updateTaskStatus to change the title
+        // Use updateTask mutation to change the title
         updateTask.mutate({ id, updates: { title: novoTexto } });
       }
     }

@@ -16,7 +16,11 @@ export const useCategories = () => {
   });
 
   const createCategory = useMutation({
-    mutationFn: categoryService.createCategory,
+    mutationFn: async (category: any) => {
+      const { data, error } = await categoryService.createCategory(category);
+      if (error) throw error;
+      return data;
+    },
     onSuccess: () => {
       toast.success("Categoria criada com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["categories"] });
@@ -27,8 +31,11 @@ export const useCategories = () => {
   });
 
   const updateCategory = useMutation({
-    mutationFn: ({ id, ...category }: { id: string; [key: string]: any }) =>
-      categoryService.updateCategory(id, category),
+    mutationFn: async ({ id, ...category }: { id: string; [key: string]: any }) => {
+      const { data, error } = await categoryService.updateCategory(id, category);
+      if (error) throw error;
+      return data;
+    },
     onSuccess: () => {
       toast.success("Categoria atualizada com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["categories"] });
@@ -39,7 +46,10 @@ export const useCategories = () => {
   });
 
   const deleteCategory = useMutation({
-    mutationFn: categoryService.deleteCategory,
+    mutationFn: async (id: string) => {
+      const { error } = await categoryService.deleteCategory(id);
+      if (error) throw error;
+    },
     onSuccess: () => {
       toast.success("Categoria deletada com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["categories"] });
