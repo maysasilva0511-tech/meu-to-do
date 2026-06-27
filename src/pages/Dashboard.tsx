@@ -19,19 +19,21 @@ export const Dashboard = () => {
     createTask,
     updateTaskStatus,
     deleteTask,
+    restoreTask,
     refetch,
   } = useTasks();
 
   const [isTaskModalOpen, setIsTaskModalOpen] = React.useState(false);
 
-  const completedCount = tasks.filter((t) => t.status === "completed").length;
-  const pendingCount = tasks.filter((t) => t.status === "pending").length;
-  const inProgressCount = tasks.filter(
+  const activeTasks = tasks.filter((t) => t.status !== "deleted");
+  const completedCount = activeTasks.filter((t) => t.status === "completed").length;
+  const pendingCount = activeTasks.filter((t) => t.status === "pending").length;
+  const inProgressCount = activeTasks.filter(
     (t) => t.status === "in_progress",
   ).length;
 
   const stats = {
-    total: tasks.length,
+    total: activeTasks.length,
     completed: completedCount,
     pending: pendingCount,
     inProgress: inProgressCount,
@@ -47,20 +49,20 @@ export const Dashboard = () => {
     await supabase.auth.signOut();
     navigate("/auth/login");
   };
+
   const handleConfirmDelete = (id: string) => {
-    const certeza = window.confirm("Tem certeza que deseja excluir esta tarefa?");
+    const certeza = window.confirm("Tem certeza que deseja mover esta tarefa para a lixeira?");
     if (certeza) {
       deleteTask.mutate(id);
     }
   };
+
   const handleConfirmEdit = (id: string, textoAtual: string) => {
     const novoTexto = window.prompt("Altere o título da tarefa:", textoAtual);
     
-    // Se o usuário digitou algo e clicou em OK
     if (novoTexto !== null && novoTexto.trim() !== "") {
       const certeza = window.confirm(`Confirma a alteração para: "${novoTexto}"?`);
       if (certeza) {
-        // Usa a mutação existente para atualizar o título
         updateTaskStatus.mutate({ id, title: novoTexto });
       }
     }
@@ -119,6 +121,7 @@ export const Dashboard = () => {
               }
               onDelete={handleConfirmDelete}
               onEdit={handleConfirmEdit}
+              onRestore={(id) => restoreTask.mutate(id)}
             />
           </>
         )}
