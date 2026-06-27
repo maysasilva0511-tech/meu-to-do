@@ -22,15 +22,15 @@ interface TaskItemProps {
 }
 
 const statusConfig = {
-  pending: { label: "Pendente", icon: Circle, color: "text-slate-400", bg: "bg-slate-100" },
-  in_progress: { label: "Em Progresso", icon: Clock, color: "text-blue-600", bg: "bg-blue-100" },
-  completed: { label: "Concluída", icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-100" },
+  pending: { label: "Pendente", icon: Circle, color: "text-slate-400", bg: "bg-slate-700" },
+  in_progress: { label: "Em Progresso", icon: Clock, color: "text-emerald-500", bg: "bg-emerald-700" },
+  completed: { label: "Concluída", icon: CheckCircle, color: "text-emerald-300", bg: "bg-emerald-800" },
 };
 
 const priorityConfig = {
-  low: { label: "Baixa", color: "text-slate-600", bg: "bg-slate-100" },
-  medium: { label: "Média", color: "text-amber-600", bg: "bg-amber-100" },
-  high: { label: "Alta", color: "text-red-600", bg: "bg-red-100" },
+  low: { label: "Baixa", color: "text-slate-600", bg: "bg-slate-700" },
+  medium: { label: "Média", color: "text-amber-600", bg: "bg-amber-700" },
+  high: { label: "Alta", color: "text-red-600", bg: "bg-red-700" },
 };
 
 export const TaskItem = ({
@@ -39,7 +39,7 @@ export const TaskItem = ({
   onDelete,
   onEdit,
 }: TaskItemProps) => {
-  const { updateTask } = useTasks(); // ✅ Mutation for updating any field (used for title edits)
+  const { updateTask } = useTasks();
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title ?? "");
 
@@ -50,7 +50,6 @@ export const TaskItem = ({
     minute: "2-digit",
   }).format(new Date(task.created_at));
 
-  // Safe fallbacks for status and priority configs
   const status = statusConfig[task.status] ?? statusConfig['pending'];
   const priority = priorityConfig[task.priority] ?? priorityConfig['medium'];
   const StatusIcon = status.icon;
@@ -62,10 +61,9 @@ export const TaskItem = ({
       );
       if (confirmed) {
         try {
-          // ✅ Chama a mutation correta para atualizar o título
           await updateTask.mutateAsync({
             id: task.id,
-            updates: { title: editTitle.trim() }, // Atualiza apenas o título
+            updates: { title: editTitle.trim() },
           });
           setIsEditing(false);
         } catch (error) {
@@ -91,7 +89,7 @@ export const TaskItem = ({
   };
 
   return (
-    <Card className="group border border-slate-200 bg-white transition hover:border-blue-200 hover:shadow-md">
+    <Card className="group border border-slate-600 bg-gray-800 text-gray-100 rounded-xl transition hover:border-emerald-500 hover:shadow-md">
       <CardContent className="flex items-center gap-3 p-4">
         <Button
           type="button"
@@ -120,14 +118,14 @@ export const TaskItem = ({
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="flex-1 text-base font-semibold text-slate-900 bg-transparent border-b border-blue-500 focus:outline-none"
+                className="flex-1 text-base font-semibold text-gray-100 bg-gray-700 border-b border-emerald-500 focus:outline-none"
                 autoFocus
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-full hover:bg-emerald-100 hover:text-emerald-700"
+                className="h-8 w-8 rounded-full hover:bg-emerald-600 hover:text-emerald-100"
                 onClick={handleSaveEdit}
                 disabled={updateTask.isPending}
               >
@@ -137,7 +135,7 @@ export const TaskItem = ({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-full hover:bg-red-100 hover:text-red-700"
+                className="h-8 w-8 rounded-full hover:bg-red-600 hover:text-red-100"
                 onClick={handleCancelEdit}
               >
                 <X className="h-4 w-4" />
@@ -150,8 +148,8 @@ export const TaskItem = ({
                   className={[
                     "truncate text-base font-semibold transition",
                     task.status === "completed"
-                      ? "text-muted-foreground line-through"
-                      : "text-slate-900",
+                      ? "text-gray-500 line-through"
+                      : "text-gray-100",
                   ].join(" ")}
                 >
                   {task.title ?? "Sem título"}
@@ -160,13 +158,13 @@ export const TaskItem = ({
                   {priority.label}
                 </span>
               </div>
-              <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+              <div className="mt-1 flex items-center gap-3 text-xs text-gray-400">
                 <span>Criada em {formattedDate}</span>
                 <span className={`px-2 py-0.5 rounded-full ${status.bg} ${status.color}`}>
                   {status.label}
                 </span>
                 {task.due_date && (
-                  <span className="text-amber-600">
+                  <span className="text-amber-400">
                     Vence:{" "}
                     {new Intl.DateTimeFormat("pt-BR", {
                       day: "2-digit",
@@ -185,7 +183,7 @@ export const TaskItem = ({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-10 w-10 shrink-0 rounded-full text-slate-500 opacity-0 transition group-hover:opacity-100 hover:bg-slate-100 hover:text-slate-700"
+              className="h-10 w-10 shrink-0 rounded-full text-gray-400 opacity-0 transition group-hover:opacity-100 hover:bg-gray-700 hover:text-gray-200"
               onClick={() => setIsEditing(true)}
               aria-label="Editar tarefa"
             >
@@ -196,7 +194,7 @@ export const TaskItem = ({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-10 w-10 shrink-0 rounded-full text-destructive opacity-0 transition group-hover:opacity-100 hover:bg-red-50 hover:text-red-700"
+              className="h-10 w-10 shrink-0 rounded-full text-red-500 opacity-0 transition group-hover:opacity-100 hover:bg-red-800 hover:text-red-200"
               onClick={() => onDelete(task.id)}
               aria-label="Excluir tarefa"
             >

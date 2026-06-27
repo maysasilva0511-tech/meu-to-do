@@ -60,25 +60,25 @@ export const Dashboard = () => {
     if (novoTexto !== null && novoTexto.trim() !== "") {
       const certeza = window.confirm(`Confirma a alteração para: "${novoTexto}"?`);
       if (certeza) {
-        // Usa a mutação existente para atualizar o título (passando os dados necessários)
+        // Usa a mutação existente para atualizar o título
         updateTaskStatus.mutate({ id, title: novoTexto });
       }
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gray-900 text-gray-100">
       <DashboardHeader
         onCreateTask={() => setIsTaskModalOpen(true)}
         onLogout={handleLogout}
       />
 
       <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-        <section className="mb-8 rounded-3xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur sm:p-8">
+        <section className="mb-8 rounded-3xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur sm:p-8 dark:bg-gray-800">
           <div className="max-w-2xl mx-auto text-center">
             <div className="flex flex-col items-center gap-2">
-              <Calendar className="h-8 w-8 text-blue-600" />
-              <h1 className="text-3xl font-bold tracking-tight text-blue-600">
+              <Calendar className="h-8 w-8 text-emerald-500" />
+              <h1 className="text-3xl font-bold tracking-tight text-emerald-500">
                 Meu To Do
               </h1>
             </div>
@@ -86,22 +86,22 @@ export const Dashboard = () => {
         </section>
 
         {isLoading ? (
-          <div className="flex min-h-[320px] items-center justify-center rounded-3xl border border-dashed bg-white">
+          <div className="flex min-h-[320px] items-center justify-center rounded-3xl border border-dashed bg-gray-800">
             <div className="text-center">
-              <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-              <p className="text-sm text-muted-foreground">
+              <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+              <p className="text-sm text-gray-300">
                 Carregando dashboard...
               </p>
             </div>
           </div>
         ) : error ? (
-          <div className="flex min-h-[320px] items-center justify-center rounded-3xl border border-dashed bg-white">
+          <div className="flex min-h-[320px] items-center justify-center rounded-3xl border border-dashed bg-gray-800">
             <div className="max-w-md text-center">
-              <p className="text-sm font-medium text-destructive">
+              <p className="text-sm font-medium text-red-400">
                 Não foi possível carregar suas tarefas.
               </p>
               <button
-                className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                className="mt-4 rounded-md bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700"
                 onClick={() => window.location.reload()}
               >
                 Tentar novamente
@@ -117,8 +117,8 @@ export const Dashboard = () => {
               onStatusChange={(id, status) =>
                 updateTaskStatus.mutate({ id, status })
               }
-              onDelete={handleConfirmDelete} // 🛠️ Atualizado para usar a confirmação
-              onEdit={handleConfirmEdit}     // 🛠️ Passando a nova função de editar para a lista
+              onDelete={handleConfirmDelete}
+              onEdit={handleConfirmEdit}
             />
           </>
         )}
